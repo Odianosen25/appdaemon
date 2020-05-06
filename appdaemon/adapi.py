@@ -862,7 +862,8 @@ class ADAPI:
 
         """
         kwargs["app"] = app
-        kwargs["namespace"] = "appdaemon"
+        kwargs["namespace"] = "admin"
+        kwargs["__name"] = self.name
         self.call_service("app/start", **kwargs)
         return None
 
@@ -881,7 +882,8 @@ class ADAPI:
 
         """
         kwargs["app"] = app
-        kwargs["namespace"] = "appdaemon"
+        kwargs["namespace"] = "admin"
+        kwargs["__name"] = self.name
         self.call_service("app/stop", **kwargs)
         return None
 
@@ -900,7 +902,8 @@ class ADAPI:
 
         """
         kwargs["app"] = app
-        kwargs["namespace"] = "appdaemon"
+        kwargs["namespace"] = "admin"
+        kwargs["__name"] = self.name
         self.call_service("app/restart", **kwargs)
         return None
 
@@ -920,7 +923,8 @@ class ADAPI:
             >>> self.reload_apps()
 
         """
-        kwargs["namespace"] = "appdaemon"
+        kwargs["namespace"] = "admin"
+        kwargs["__name"] = self.name
         self.call_service("app/reload", **kwargs)
         return None
 
