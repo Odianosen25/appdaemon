@@ -31,6 +31,8 @@ Change Log
 - Cleanup sequences when modified. This ensures removed sequences are also removed from the Admin UI and AD
 - Added support to use environment variables using the `!env_var` tag, if not wanting to use the `!secrets` tag
 - Additional format for time travel start and end times accepted
+- Moved `appdaemon` services to `admin` namespace
+- Added services for creating, editting, removing, enabling, disabling apps
 - Added the ability to submit tasks to executor threads
 
 **Fixes**
