@@ -31,9 +31,12 @@ Change Log
 - Cleanup sequences when modified. This ensures removed sequences are also removed from the Admin UI and AD
 - Added support to use environment variables using the `!env_var` tag, if not wanting to use the `!secrets` tag
 - Additional format for time travel start and end times accepted
+<<<<<<< HEAD
 - Moved `appdaemon` services to `admin` namespace
 - Added services for creating, editting, removing, enabling, disabling apps
 - Added the ability to submit tasks to executor threads
+- Added ability for apps to create namespaces, and remove the created namespace. This namespaces are persistent by default
+- Added ability to receive binary payload from MQTT broker
 
 **Fixes**
 
@@ -45,6 +48,7 @@ Change Log
 - Fix tzdata error in docker build for RPI - contributed by `Guy Khmelnitsky <https://github.com/GuyKh>`__
 - Fix for `get_tz_offset()` not working in some circumstances - contributed by `sillyfrog <https://github.com/sillyfrog>`__
 - Added some locking to prevent array size change errors
+- Allowed for both multi and single level MQTT wildcard subscription
 
 **Breaking Changes**
 
