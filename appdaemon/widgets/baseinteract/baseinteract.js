@@ -4,6 +4,7 @@ function baseinteract(widget_id, url, skin, parameters)
 
      // Initialization
 
+    var widget_name = widget_id.slice(widget_id.indexOf("-") + 1);
     self.parameters = parameters;
     self.OnEvent = OnEvent;
 
@@ -58,11 +59,9 @@ function baseinteract(widget_id, url, skin, parameters)
         args["y_pos"] = event.pageY;
         args["key_press"] = event.which;
         args["timestamp"] = event.timeStamp;
-        args["widget_id"] = widget_id;
+        args["widget"] = widget_name;
 
         self.call_service(self, args)
-
-        //console.log(event);
 
     }
 
