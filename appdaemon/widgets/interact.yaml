@@ -6,7 +6,7 @@ fields:
   frame_style: '{{frame_style}}'
 icons: []
 static_css:
-  title_style: $interact_title_style
-  widget_style: $interact_widget_style
+  title_style: $camera_title_style
+  widget_style: $camera_widget_style
 css: []
 static_icons: []
