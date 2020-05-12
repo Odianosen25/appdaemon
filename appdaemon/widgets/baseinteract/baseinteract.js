@@ -7,14 +7,16 @@ function baseinteract(widget_id, url, skin, parameters)
     self.parameters = parameters;
     self.OnEvent = OnEvent;
 
-    if ("mouseEvents" in parameters){
-        var actions = parameters.mouseEvents.join(" ")
+    if ("mouse_events" in parameters){
+        var actions = parameters.mouse_events.join(" ");
         
     }
 
     else {
-        var actions = "click"
+        var actions = "click";
     }
+
+    // get the mouse entity
 
     var callbacks = [
         {"selector": "img", "action": actions, "event" : true, "callback": OnEvent},
@@ -48,19 +50,19 @@ function baseinteract(widget_id, url, skin, parameters)
 
     function OnEvent(event)
     {
-
-        var args = {"service" : "event/fire"};
+        
+        var args = {};
+        args["service"] = "event/fire";
         args["event"] = event.type;
-        args["x"] = event.pageX;
-        args["y"] = event.pageY;
+        args["x_pos"] = event.pageX;
+        args["y_pos"] = event.pageY;
         args["key_press"] = event.which;
-        args["timeStamp"] = event.timeStamp;
+        args["timestamp"] = event.timeStamp;
+        args["widget_id"] = widget_id;
 
         self.call_service(self, args)
+
         //console.log(event);
-        //console.log(event.type);
-        //console.log(event.pageX);
-        //console.log(event.pageY);
 
     }
 
