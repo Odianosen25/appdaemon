@@ -6,7 +6,10 @@ function baseinteract(widget_id, url, skin, parameters)
 
     var widget_name = widget_id.slice(widget_id.indexOf("-") + 1);
     self.parameters = parameters;
+
     self.OnEvent = OnEvent;
+    self.OnStateAvailable = OnStateAvailable
+    self.OnStateUpdate = OnStateUpdate
 
     if ("mouse_events" in parameters){
         var actions = parameters.mouse_events.join(" ");
@@ -23,9 +26,6 @@ function baseinteract(widget_id, url, skin, parameters)
         {"selector": "img", "action": actions, "event" : true, "callback": OnEvent},
     ];
 
-    self.OnStateAvailable = OnStateAvailable
-    self.OnStateUpdate = OnStateUpdate
-
     // First check there is an entity, and if there is setup callback
 
     if ("entity" in parameters){
@@ -38,7 +38,6 @@ function baseinteract(widget_id, url, skin, parameters)
 
     else var monitored_entities = []
 
-     
     // Call the parent constructor to get things moving
 
     WidgetBase.call(self, widget_id, url, skin, parameters, monitored_entities, callbacks);
@@ -51,17 +50,21 @@ function baseinteract(widget_id, url, skin, parameters)
 
     function OnEvent(event)
     {
-        
+        var baseURI = event.target.baseURI;
+        var dash_name = baseURI.slice(baseURI.lastIndexOf("/") + 1);
+
         var args = {};
         args["service"] = "event/fire";
         args["event"] = event.type;
         args["x_pos"] = event.pageX;
         args["y_pos"] = event.pageY;
         args["key_press"] = event.which;
-        args["timestamp"] = event.timeStamp;
         args["widget"] = widget_name;
+        args["dashboard"] = dash_name;
 
         self.call_service(self, args)
+
+        console.log(event);
 
     }
 
