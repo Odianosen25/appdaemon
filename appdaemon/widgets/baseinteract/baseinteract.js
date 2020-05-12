@@ -47,18 +47,35 @@ function baseinteract(widget_id, url, skin, parameters)
     self.index = 0;
     refresh_frame(self)
     self.timeout = undefined
+    var oldx = 0;
+    var oldy = 0;
+    var minimum_pixel = parameters.minimum_pixel || 30;
+
 
     function OnEvent(event)
-    {
+    {   
+        var x_pos = event.offsetX;
+        var y_pos = event.offsetY;
+        var mouse_event = event.type;
+
+        if (mouse_event == "mousemove" && 
+            (((x_pos + y_pos) - (oldx + oldy) < minimum_pixel) && 
+            ((x_pos + y_pos) - (oldx + oldy) > -minimum_pixel)))
+            {
+            return
+        }
+
+        oldx = x_pos;
+        oldy = y_pos;
         var baseURI = event.target.baseURI;
         var dash_name = baseURI.slice(baseURI.lastIndexOf("/") + 1);
         var d = new Date();
 
         var args = {};
         args["service"] = "event/fire";
-        args["event"] = event.type;
-        args["x_pos"] = event.offsetX;
-        args["y_pos"] = event.offsetY;
+        args["event"] = mouse_event;
+        args["x_pos"] = x_pos;
+        args["y_pos"] = y_pos;
         args["key_press"] = event.which;
         args["timestamp"] = d.getTime();
         args["widget"] = widget_name;
