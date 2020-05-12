@@ -52,13 +52,15 @@ function baseinteract(widget_id, url, skin, parameters)
     {
         var baseURI = event.target.baseURI;
         var dash_name = baseURI.slice(baseURI.lastIndexOf("/") + 1);
+        var d = new Date();
 
         var args = {};
         args["service"] = "event/fire";
         args["event"] = event.type;
-        args["x_pos"] = event.pageX;
-        args["y_pos"] = event.pageY;
+        args["x_pos"] = event.offsetX;
+        args["y_pos"] = event.offsetY;
         args["key_press"] = event.which;
+        args["timestamp"] = d.getTime();
         args["widget"] = widget_name;
         args["dashboard"] = dash_name;
 
