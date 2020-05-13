@@ -53,15 +53,20 @@ function baseinteract(widget_id, url, skin, parameters)
 
 
     function OnEvent(event)
-    {   
+    {
+        // get the data from the event
+
         var x_pos = event.offsetX;
         var y_pos = event.offsetY;
         var mouse_event = event.type;
 
+        // now decide if to process the event depending on if its a mousemove
+        // and if the mouse if over the minimum threshold
+
         if (mouse_event == "mousemove" && 
             (((x_pos + y_pos) - (oldx + oldy) < minimum_pixel) && 
-            ((x_pos + y_pos) - (oldx + oldy) > -minimum_pixel)))
-            {
+            ((x_pos + y_pos) - (oldx + oldy) > -minimum_pixel))){
+                
             return
         }
 
