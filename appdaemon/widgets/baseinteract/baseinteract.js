@@ -5,11 +5,23 @@ function baseinteract(widget_id, url, skin, parameters)
      // Initialization
 
     var widget_name = widget_id.slice(widget_id.indexOf("-") + 1);
+    var monitored_entities = [];
     self.parameters = parameters;
 
     self.OnEvent = OnEvent;
-    self.OnStateAvailable = OnStateAvailable
-    self.OnStateUpdate = OnStateUpdate
+    self.OnStateAvailable = OnStateAvailable;
+    self.OnStateUpdate = OnStateUpdate;
+
+    if ("entity" in parameters && parameters.entity != "")
+    {
+        // Make sure that we monitor the entity, not an attribute of it
+        split_entity = parameters.entity.split(".");
+        self.entity = split_entity[0] + "." + split_entity[1];
+        if (split_entity.length > 2)
+        {
+            self.entity_attribute = split_entity[2];
+        }
+    }
 
     if ("mouse_events" in parameters){
         var actions = parameters.mouse_events.join(" ");
@@ -28,15 +40,13 @@ function baseinteract(widget_id, url, skin, parameters)
 
     // First check there is an entity, and if there is setup callback
 
-    if ("entity" in parameters){
+    if ("entity" in self) {
         var monitored_entities =
         [
-            {"entity": parameters.entity, "initial": self.OnStateAvailable, "update": self.OnStateUpdate},
+            {"entity": self.entity, "initial": self.OnStateAvailable, "update": self.OnStateUpdate},
         ];
 
     }
-
-    else var monitored_entities = []
 
     // Call the parent constructor to get things moving
 
@@ -94,7 +104,7 @@ function baseinteract(widget_id, url, skin, parameters)
 
     function refresh_frame(self, url)
     {
-        if (url === undefined){ 
+        if (url === undefined){
 
             if ("base_url" in self.parameters && "access_token" in self) {
                 var endpoint = '/api/camera_proxy/'
@@ -112,10 +122,12 @@ function baseinteract(widget_id, url, skin, parameters)
 
             else
             {
-                url = '/images/Blank.gif'
+                url = ""
             }
         
         }
+
+        if (url == "") url = '/images/Blank.gif';
 
         if (url.indexOf('?') > -1)
         {
@@ -163,7 +175,11 @@ function baseinteract(widget_id, url, skin, parameters)
 
         else { // mostlikely the url is in the state
 
-            refresh_frame(self, state.state)
+            if ("entity_attribute" in self) {
+                var url = state.attributes[self.entity_attribute];
+            } else var url = state.state;
+
+            refresh_frame(self, url)
         }
         
     }
@@ -183,7 +199,11 @@ function baseinteract(widget_id, url, skin, parameters)
 
         else { // mostlikely the url is in the state
 
-            refresh_frame(self, state.state)
+            if ("entity_attribute" in self) {
+                var url = state.attributes[self.entity_attribute];
+            } else var url = state.state;
+
+            refresh_frame(self, url)
         }
     }
 
