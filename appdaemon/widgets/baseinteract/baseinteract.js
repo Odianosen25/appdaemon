@@ -153,7 +153,7 @@ function baseinteract(widget_id, url, skin, parameters)
         if (refresh > 0)
         {
             clearTimeout(self.timeout)
-            self.timeout = setTimeout(function() {refresh_frame(self, url)}, refresh * 1000);
+            self.timeout = setTimeout(function(url) {refresh_frame(self, url)}, refresh * 1000, url);
         }
 
      }
