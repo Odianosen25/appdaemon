@@ -320,16 +320,20 @@ class Threading:
                 for thread in self.threads:
                     qsize = self.threads[thread]["queue"].qsize()
                     if qsize > 0:
+                        time_called = await self.get_state(
+                            "_threading", "admin", "thread.{}".format(thread), attribute="time_called",
+                        )
+                        if time_called == "never":
+                            time_called = utils.dt_to_str(
+                                (await self.AD.sched.get_now()).replace(microsecond=0), self.AD.tz
+                            )
+
                         self.logger.warning(
                             "Queue size for thread %s is %s, callback is '%s' called at %s - possible thread starvation",
                             thread,
                             qsize,
                             await self.get_state("_threading", "admin", "thread.{}".format(thread)),
-                            iso8601.parse_date(
-                                await self.get_state(
-                                    "_threading", "admin", "thread.{}".format(thread), attribute="time_called",
-                                )
-                            ),
+                            iso8601.parse_date(time_called),
                         )
 
                 await self.dump_threads()
