@@ -5,7 +5,6 @@ import websocket
 import traceback
 from urllib.parse import quote
 import uuid
-import copy
 
 import appdaemon.utils as utils
 from appdaemon.appdaemon import AppDaemon
