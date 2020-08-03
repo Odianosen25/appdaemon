@@ -5,7 +5,6 @@ import websocket
 import traceback
 from urllib.parse import quote
 import uuid
-import copy
 
 import appdaemon.utils as utils
 from appdaemon.appdaemon import AppDaemon
@@ -53,8 +52,8 @@ class AdPlugin(PluginBase):
         else:
             self.namespace = "default"
 
-        if "ad_url" in args:
-            self.ad_url = args["ad_url"]
+        if "url" in args:
+            self.ad_url = args["url"]
         else:
             self.ad_url = None
             self.logger.warning(
@@ -64,18 +63,12 @@ class AdPlugin(PluginBase):
                 "AppDaemon requires remote AD's URL, and none provided in plugin config"
             )
 
-        self.api_key = args.get("api_key")
-
+        self.password = args.get("password")
         self.timeout = args.get("timeout")
-
         self.cert_verify = args.get("cert_verify", True)
-
         self.ca_certs = args.get("ca_certs")
-
         self.ca_cert_path = args.get("ca_cert_path")
-
         self.ssl_certificate = args.get("ssl_certificate")
-
         self.ssl_key = args.get("ssl_key")
 
         if "client_name" in args:
@@ -84,13 +77,13 @@ class AdPlugin(PluginBase):
             self.client_name = "{}_{}".format(self.name.lower(), uuid.uuid4().hex)
 
         self.proxy = args.get("proxy")
-
         self.check_hostname = args.get("check_hostname", True)
-
         self.subscriptions = args.get("subscriptions")
-
         self.forward_namespaces = args.get("forward_namespaces", {})
         self.forward_namespaces["forwarded_namespaces"] = {}
+
+        if "enabled" not in self.forward_namespaces:
+            self.forward_namespaces["enabled"] = False
 
         self.tls_version = args.get("tls_version", "auto")
 
@@ -109,7 +102,6 @@ class AdPlugin(PluginBase):
                 self.tls_version = ssl.PROTOCOL_TLSv1
 
         self.ssl_certificate = args.get("ssl_certificate")
-
         self.host_proxy = {}
 
         if "http_proxy_host" in args:
@@ -129,7 +121,6 @@ class AdPlugin(PluginBase):
             self.remote_namespaces[remote] = local
 
         self.logger.info("AD Plugin initialization complete")
-
         self.metadata = {"version": "1.0"}
 
     async def am_reading_messages(self):
@@ -241,7 +232,7 @@ class AdPlugin(PluginBase):
                 data = {
                     "request_type": "hello",
                     "request_id": uuid.uuid4().hex,
-                    "data": {"client_name": self.client_name, "password": self.api_key},
+                    "data": {"client_name": self.client_name, "password": self.password},
                 }
 
                 await utils.run_in_executor(self, self.ws.send, json.dumps(data))
@@ -301,7 +292,6 @@ class AdPlugin(PluginBase):
                     )
 
                 states = await self.get_complete_state()
-
                 namespaces.extend(list(states.keys()))
 
                 #
@@ -309,7 +299,6 @@ class AdPlugin(PluginBase):
                 #
 
                 self.subscription_event_stream()
-
                 namespace = {"namespace": self.namespace, "namespaces": namespaces}
 
                 await self.AD.plugins.notify_plugin_started(
@@ -331,10 +320,10 @@ class AdPlugin(PluginBase):
                     result = json.loads(res)
                     self.logger.debug("%s", result)
 
-                    if result.get("response_type") in [
+                    if result.get("response_type") in (
                         "event",
                         "state_changed",
-                    ]:  # an event happened
+                    ):  # an event happened
                         remote_namespace = result["data"].pop("namespace")
 
                         data = result["data"]
@@ -361,7 +350,7 @@ class AdPlugin(PluginBase):
                             ].set()  # time for pickup
 
             except Exception:
-                if self.forward_namespaces.get("allow") is True:
+                if self.forward_namespaces["enabled"] is True:
                     # remove callback from getting local events
                     await self.AD.callbacks.clear_callbacks(self.name)
 
@@ -399,7 +388,7 @@ class AdPlugin(PluginBase):
                 for subscription in self.subscriptions["event"]:
                     asyncio.ensure_future(self.run_subscription("event", subscription))
 
-        if self.forward_namespaces.get("allow") is True:
+        if self.forward_namespaces["enabled"] is True:
             # meaning it is to forward the stream
             # so setup to receive instructions for this local instance from the remote one
             # self.client_name* is used, to make it easy for the far-end to use namespace just
@@ -425,7 +414,34 @@ class AdPlugin(PluginBase):
                 local_namespace, domain, service, self.call_plugin_service
             )
 
-        elif data["event_type"] == "get_state":  # get state
+        elif self.forward_namespaces["enabled"] is True and data["event_type"] in ("get_state", "get_services", "call_service", "listen_event", "cancel_listen_event"):
+            res, response = await self.process_forward_event(local_namespace, remote_namespace, data)
+
+        else:
+            data["data"]["__AD_ORIGIN"] = self.client_name
+            await self.AD.events.process_event(local_namespace, data)
+
+        if res is not None:  # a response should be sent back
+            request_id = data.pop("request_id", uuid.uuid4().hex)
+
+            data = {}
+            data["response"] = res
+            data["response_type"] = response
+            data["response_id"] = request_id
+
+            if local_namespace is None:
+                remote_namespace = self.client_name
+
+            else:
+                remote_namespace = f"{self.client_name}_{local_namespace}"
+
+            await self.fire_plugin_event(response, remote_namespace, **data)
+    
+    async def process_forward_event(self, local_namespace, remote_namespace, data):
+        res = None
+        response = None
+
+        if data["event_type"] == "get_state":  # get state
             forwarded_namespaces = list(self.forward_namespaces["forwarded_namespaces"].keys())
             entity_id = data["data"].get("entity_id")
             requested_namespace = data["data"].get(
@@ -522,27 +538,8 @@ class AdPlugin(PluginBase):
                         namespace
                     )
                     await self.AD.events.cancel_event_callback(self.name, handle)
-
-        else:
-            data["data"]["__AD_ORIGIN"] = self.client_name
-
-            await self.AD.events.process_event(local_namespace, data)
-
-        if res is not None:  # a response should be sent back
-            request_id = data.pop("request_id", uuid.uuid4().hex)
-
-            data = {}
-            data["response"] = res
-            data["response_type"] = response
-            data["response_id"] = request_id
-
-            if local_namespace is None:
-                remote_namespace = self.client_name
-
-            else:
-                remote_namespace = f"{self.client_name}_{local_namespace}"
-
-            await self.fire_plugin_event(response, remote_namespace, **data)
+        
+        return res, response
 
     async def setup_forward_events(self, namespaces):
         handles = {}
@@ -1036,7 +1033,7 @@ class AdPlugin(PluginBase):
             local_namespace = namespace.replace(self.client_name, "")
 
             # if it is empty
-            if local_namespace in ["", "_"]:
+            if local_namespace in ("", "_"):
                 local_namespace = None
 
             # if it is starting with an underscore like _default
