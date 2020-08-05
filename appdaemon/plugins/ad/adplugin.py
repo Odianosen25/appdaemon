@@ -374,7 +374,6 @@ class AdPlugin(PluginBase):
                     self.logger.debug("Unexpected error:")
                     self.logger.debug("-" * 60)
                     self.logger.debug(traceback.format_exc())
-                    # print(traceback.format_exc())
                     self.logger.debug("-" * 60)
                     await asyncio.sleep(5)
 
@@ -511,7 +510,6 @@ class AdPlugin(PluginBase):
             res = await self.AD.services.call_service(
                 local_namespace, domain, service, service_data
             )
-            print(local_namespace, domain, service, service_data, res)
             response = "call_service_response"
 
         elif (
@@ -711,7 +709,6 @@ class AdPlugin(PluginBase):
 
         if namespace not in list(self.remote_namespaces.values()):
             self.logger.warning("Unidentified namespace given as %s", namespace)
-            print("call_plugin_service", namespace, domain, service)
             return res
 
         else:
@@ -754,7 +751,6 @@ class AdPlugin(PluginBase):
 
         try:
             data["entity_id"] = entity_id
-            print("set_plugin_state", namespace, entity_id, data)
             res = await self.call_plugin_service(namespace, "state", "set", data)
 
         except Exception:
@@ -784,7 +780,6 @@ class AdPlugin(PluginBase):
             if not namespace.startswith(self.client_name):
                 self.logger.warning("Unidentified namespace given as %s", namespace)
 
-            print("fire_plugin_event", event, namespace)
             return None
 
         else:
@@ -929,7 +924,6 @@ class AdPlugin(PluginBase):
             self.logger.error("Unexpected error during forward_event()")
             self.logger.debug("-" * 60)
             self.logger.debug(traceback.format_exc())
-            print(traceback.format_exc())
             self.logger.debug("-" * 60)
 
     async def get_ad_state(self):
