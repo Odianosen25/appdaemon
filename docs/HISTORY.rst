@@ -6,13 +6,14 @@ Change Log
 
 **Features**
 
-None
+- Added ability to receive binary payload from MQTT broker
 
 **Fixes**
 
-None
+- Allowed for both multi and single level MQTT wildcard subscription
 
 **Breaking Changes**
+- Moved the local static folder for serving static files from `web` to `www`
 
 None
 

@@ -365,6 +365,9 @@ input_slider_level_up_style: "color: $gray_light"
 input_slider_level_down_style: "color: $gray_light"
 input_slider_widget_style: $background_style
 
+interact_widget_style: $background_style
+interact_title_style: "$style_title; background-color: rgba(0, 0, 0, 0.5)"
+
 new_input_number_title_style: $style_title
 new_input_number_title2_style: $style_title2
 new_input_number_minvalue_style: $style_title
