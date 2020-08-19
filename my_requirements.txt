@@ -1,0 +1,35 @@
+# requirements for my AD instance
+#pendulum
+num2words
+plotly
+newsapi-python
+BeautifulSoup4
+pyserial-asyncio
+#RPi.GPIO
+smbus2
+#google-api-python-client
+fuzzywuzzy[speedup]
+rapidconnect
+docker
+python-telegram-bot
+wikipedia
+jsonrpcclient[requests]
+psutil>=5.6.6
+dropbox
+paramiko
+umodbus
+broadlink
+wsaccel #for websockets
+pymysql==0.9.2
+aiosqlite
+aiomysql
+databases
+databases[postgresql]
+databases[mysql]
+databases[sqlite]
+#opencv-python
+git+https://github.com/nathanrooy/spatial-analysis
+git+https://github.com/hbldh/duckdns-upd8.git 
+aiodns
+cchardet
+#opencv-python
