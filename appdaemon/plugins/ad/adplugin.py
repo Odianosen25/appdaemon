@@ -415,6 +415,10 @@ class AdPlugin(PluginBase):
             self.AD.services.register_service(
                 local_namespace, domain, service, self.call_plugin_service
             )
+        
+        elif data["event_type"] == "__AD_ENTITY_REMOVED": # an entity was deleted
+            entity_id = data["data"]["entity_id"]
+            await self.AD.state.remove_entity(local_namespace, entity_id)
 
         elif self.forward_namespaces["enabled"] is True and data["event_type"] in (
             "get_state",
